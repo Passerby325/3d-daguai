@@ -86,7 +86,9 @@ export class EnemyManager {
         
         // 当刷新时间到达时，如果Boss数量少于设置的Boss数量，则生成
         const aliveBosses = this.bosses.filter(b => b && !b.isDead).length;
+        console.log(`Boss生成检查: timer=${this.bossSpawnTimer.toFixed(1)}, interval=${this.bossSpawnInterval}, alive=${aliveBosses}, count=${this.bossCount}`);
         if (this.bossSpawnTimer >= this.bossSpawnInterval && aliveBosses < this.bossCount) {
+            console.log('生成新Boss!');
             this.spawnBoss();
             this.bossSpawnTimer = 0;
         }
