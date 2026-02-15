@@ -20,7 +20,7 @@ export class Player {
         this.canJump = false;
         this.isDead = false;
         this.attackCooldown = 0;
-        this.attackCooldownMax = 0.2; // 0.2秒的攻击CD
+        this.attackCooldownMax = 0.5; // 0.5秒的攻击CD
         
         this.keys = {
             w: false,
@@ -206,6 +206,9 @@ export class Player {
             this.attackCooldown -= delta;
         }
         
+        // 更新攻击冷却进度条
+        this.updateCooldownBar();
+        
         // 计算移动方向
         this.direction.set(0, 0, 0);
         
@@ -292,6 +295,17 @@ export class Player {
         this.isDead = true;
         alert('游戏结束！按F5重新开始');
         location.reload();
+    }
+    
+    updateCooldownBar() {
+        const cooldownFill = document.getElementById('attack-cooldown-fill');
+        if (cooldownFill) {
+            // 冷却中显示剩余比例，冷却完成显示100%
+            const percent = this.attackCooldown > 0 
+                ? ((this.attackCooldownMax - this.attackCooldown) / this.attackCooldownMax) * 100 
+                : 100;
+            cooldownFill.style.width = `${percent}%`;
+        }
     }
     
     heal(amount) {
