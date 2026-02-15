@@ -79,14 +79,6 @@ export class Game {
         
         // 监听Boss死亡事件
         document.addEventListener('boss-defeated', () => {
-            const bossHealthBar = document.getElementById('boss-health-bar');
-            const bossName = document.getElementById('boss-name');
-            if (bossHealthBar) {
-                bossHealthBar.style.display = 'none';
-            }
-            if (bossName) {
-                bossName.style.display = 'none';
-            }
             this.addBossKill();
         });
         

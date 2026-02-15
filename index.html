@@ -62,33 +62,6 @@
             height: 15px;
         }
         
-        #boss-health-bar {
-            position: absolute;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 500px;
-            height: 30px;
-            background: rgba(0, 0, 0, 0.7);
-            border: 3px solid #ff0000;
-            border-radius: 15px;
-            overflow: hidden;
-            display: none;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
-        }
-        
-        #boss-health-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff0000, #ff6600);
-            transition: width 0.3s;
-            box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
-        }
-        
-        #boss-name {
-            position: absolute;
-            top: 50px;
-        }
-        
         #minimap {
             position: absolute;
             top: 20px;
@@ -441,11 +414,6 @@
             </div>
             
             <div id="ai-dialogue"></div>
-            
-            <div id="boss-name">★ BOSS ★</div>
-            <div id="boss-health-bar">
-                <div id="boss-health-fill"></div>
-            </div>
             
             <div id="minimap">
                 <div class="minimap-grid"></div>

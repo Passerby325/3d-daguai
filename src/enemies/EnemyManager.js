@@ -197,17 +197,18 @@ export class EnemyManager {
     }
     
     spawnBoss() {
-        // 在玩家一定距离外生成Boss
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 40;
-        const x = this.player.getPosition().x + Math.cos(angle) * distance;
-        const z = this.player.getPosition().z + Math.sin(angle) * distance;
+        // 随机生成Boss位置（不限制距离，只要不在玩家10米内）
+        let x, z, distance;
+        do {
+            x = (Math.random() - 0.5) * 180;
+            z = (Math.random() - 0.5) * 180;
+            distance = Math.sqrt(
+                Math.pow(x - this.player.getPosition().x, 2) + 
+                Math.pow(z - this.player.getPosition().z, 2)
+            );
+        } while (distance < 10); // 确保不在玩家10米内
         
-        // 确保在地图范围内
-        const finalX = Math.max(-80, Math.min(80, x));
-        const finalZ = Math.max(-80, Math.min(80, z));
-        
-        this.boss = new Boss(this.scene, this.player, finalX, finalZ);
+        this.boss = new Boss(this.scene, this.player, x, z);
         this.updateEnemyCount();
         
         console.log('Boss已生成！');

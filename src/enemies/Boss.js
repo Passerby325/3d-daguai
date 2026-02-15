@@ -244,9 +244,6 @@ export class Boss extends Enemy {
         if (this.nameTag) {
             this.nameTag.lookAt(this.player.camera.position);
         }
-        
-        // 更新UI血条
-        this.updateUI();
     }
     
     updateBossAI(delta) {
@@ -528,25 +525,7 @@ export class Boss extends Enemy {
     }
     
     updateUI() {
-        const bossHealthBar = document.getElementById('boss-health-bar');
-        const bossHealthFill = document.getElementById('boss-health-fill');
-        const bossName = document.getElementById('boss-name');
-        
-        if (bossHealthBar && bossHealthFill && bossName) {
-            if (!this.isDead) {
-                bossHealthBar.style.display = 'block';
-                bossName.style.display = 'block';
-                const healthPercent = Math.max(0, (this.health / this.maxHealth) * 100);
-                bossHealthFill.style.width = `${healthPercent}%`;
-            } else {
-                // Boss死亡时立即显示血条为0
-                bossHealthFill.style.width = '0%';
-                setTimeout(() => {
-                    bossHealthBar.style.display = 'none';
-                    bossName.style.display = 'none';
-                }, 500);
-            }
-        }
+        // UI血条已移除，只保留3D血条
     }
     
     takeDamage(amount) {
