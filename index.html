@@ -62,6 +62,62 @@
             height: 15px;
         }
         
+        #boss-health-bar {
+            position: absolute;
+            top: 100px;
+            right: 30px;
+            width: 300px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #ff0000;
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+        }
+        
+        #boss-health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff6600);
+            transition: width 0.3s;
+        }
+        
+        #boss-name {
+            position: absolute;
+            top: 80px;
+            right: 30px;
+            color: #ff0000;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+            display: none;
+        }
+        
+        #difficulty-settings {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        #difficulty-settings label {
+            color: #fff;
+            font-size: 14px;
+        }
+        
+        #difficulty-settings input,
+        #difficulty-settings select {
+            margin-left: 10px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #666;
+            background: #333;
+            color: #fff;
+        }
+        
         #minimap {
             position: absolute;
             top: 20px;
@@ -384,6 +440,18 @@
                 <p><span class="key">WASD</span> 移动 | <span class="key">鼠标</span> 视角 | <span class="key">左键</span> 攻击 | <span class="key">右键</span> 切换武器</p>
                 | <span class="key">Shift</span> 加速 | <span class="key">M</span> 地图模式 | 
                 <p><span class="key">空格</span> 跳跃 | <span class="key">ESC</span> 暂停</p>
+                <div id="difficulty-settings">
+                    <label>Boss数量: <input type="number" id="boss-count" value="1" min="1" max="10"></label>
+                    <label>Boss刷新时间: 
+                        <select id="boss-interval">
+                            <option value="10">10秒</option>
+                            <option value="30">30秒</option>
+                            <option value="60">60秒</option>
+                            <option value="90">90秒</option>
+                            <option value="120">120秒</option>
+                        </select>
+                    </label>
+                </div>
                 <button id="start-btn" onclick="startGameHandler()">开始游戏</button>
             </div>
             
@@ -393,6 +461,11 @@
             
             <div class="health-bar" id="stamina-bar" style="display: none;">
                 <div class="health-fill" id="stamina-fill" style="background: linear-gradient(90deg, #ffaa00, #ffdd00);"></div>
+            </div>
+            
+            <div id="boss-name" style="display: none;">★ BOSS ★</div>
+            <div id="boss-health-bar" style="display: none;">
+                <div id="boss-health-fill"></div>
             </div>
             
             <div class="crosshair" id="crosshair" style="display: none;"></div>
@@ -460,6 +533,17 @@
         // 按钮点击处理函数
         function startGameHandler() {
             console.log('按钮被点击');
+            
+            // 获取难度设置
+            const bossCount = parseInt(document.getElementById('boss-count').value) || 1;
+            const bossInterval = parseInt(document.getElementById('boss-interval').value) || 10;
+            
+            // 保存到全局变量供Game读取
+            window.gameSettings = {
+                bossCount: bossCount,
+                bossInterval: bossInterval
+            };
+            
             document.getElementById('instructions').style.display='none';
             document.getElementById('player-health').style.display='block';
             document.getElementById('stamina-bar').style.display='block';

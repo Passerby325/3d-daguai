@@ -2,7 +2,7 @@ import { Enemy } from './Enemy.js';
 import { Boss } from './Boss.js';
 
 export class EnemyManager {
-    constructor(scene, player) {
+    constructor(scene, player, settings = {}) {
         this.scene = scene;
         this.player = player;
         this.enemies = [];
@@ -10,8 +10,10 @@ export class EnemyManager {
         // Boss系统
         this.boss = null;
         this.bossSpawnTimer = 0;
-        this.bossSpawnInterval = 10; // 每10秒生成一个Boss
+        this.bossSpawnInterval = settings.bossInterval || 10; // 每10秒生成一个Boss
+        this.bossCount = settings.bossCount || 1; // Boss数量
         this.bossDefeatedCount = 0;
+        this.bossesToSpawn = this.bossCount; // 剩余需要生成的Boss数量
         
         // 难度系统
         this.gameTime = 0;
@@ -74,6 +76,7 @@ export class EnemyManager {
         
         // Boss生成逻辑
         this.bossSpawnTimer += delta;
+        // 只有当没有存活的Boss时才生成
         if (!this.boss && this.bossSpawnTimer >= this.bossSpawnInterval) {
             this.spawnBoss();
             this.bossSpawnTimer = 0;
