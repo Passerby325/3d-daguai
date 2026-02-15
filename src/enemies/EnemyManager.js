@@ -10,8 +10,8 @@ export class EnemyManager {
         // Boss系统 - 支持多个boss
         this.bosses = []; // boss数组
         this.bossSpawnTimer = 0;
-        this.bossSpawnInterval = settings.bossInterval || 10; // 每10秒生成一个Boss
-        this.bossCount = settings.bossCount || 1; // Boss数量
+        this.bossSpawnInterval = 10; // 固定10秒刷新
+        this.bossesToSpawn = 1; // 下次生成Boss的数量（初始1个）
         this.bossDefeatedCount = 0;
         this.bossCounter = 0; // 用于追踪Boss索引
         
@@ -84,12 +84,12 @@ export class EnemyManager {
             timerElement.textContent = Math.ceil(remainingTime);
         }
         
-        // 当刷新时间到达时，如果Boss数量少于设置的Boss数量，则生成
+        // 当刷新时间到达且没有Boss存活时，生成指定数量的Boss
         const aliveBosses = this.bosses.filter(b => b && !b.isDead).length;
-        console.log(`Boss生成检查: timer=${this.bossSpawnTimer.toFixed(1)}, interval=${this.bossSpawnInterval}, alive=${aliveBosses}, count=${this.bossCount}`);
-        if (this.bossSpawnTimer >= this.bossSpawnInterval && aliveBosses < this.bossCount) {
-            console.log('生成新Boss!');
-            this.spawnBoss();
+        if (this.bossSpawnTimer >= this.bossSpawnInterval && aliveBosses === 0) {
+            for (let i = 0; i < this.bossesToSpawn; i++) {
+                this.spawnBoss();
+            }
             this.bossSpawnTimer = 0;
         }
     }
@@ -252,9 +252,17 @@ export class EnemyManager {
     }
     
     handleBossDefeated() {
-        // Boss死亡后重置计时器，从当前时间开始计算下次刷新
+        // Boss死亡后重置计时器
         this.bossSpawnTimer = 0;
         this.bossDefeatedCount++;
+        
+        // 检查所有Boss是否都死亡
+        const aliveBosses = this.bosses.filter(b => b && !b.isDead);
+        if (aliveBosses.length === 0) {
+            // 所有Boss都死亡了，增加下次生成的Boss数量
+            this.bossesToSpawn++;
+        }
+        
         this.updateEnemyCount();
     }
     

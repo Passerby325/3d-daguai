@@ -22,9 +22,6 @@ export class Game {
         this.gameTime = 0;
         this.bossKillCount = 0;
         
-        // 获取游戏设置
-        this.gameSettings = window.gameSettings || { bossCount: 1, bossInterval: 10 };
-        
         this.init();
     }
     
@@ -69,7 +66,7 @@ export class Game {
         console.log('玩家创建成功');
         
         // 创建敌人管理器
-        this.enemyManager = new EnemyManager(this.scene, this.player, this.gameSettings);
+        this.enemyManager = new EnemyManager(this.scene, this.player);
         
         // 创建战斗系统
         this.combatSystem = new CombatSystem(this.player, this.enemyManager);
@@ -207,12 +204,7 @@ export class Game {
             
             this.enemyManager.spawnEnemy(x, z);
         }
-        
-        // 根据设置生成初始Boss
-        const bossCount = this.gameSettings.bossCount || 1;
-        for (let i = 0; i < bossCount; i++) {
-            this.enemyManager.spawnBoss();
-        }
+        // Boss会在10秒后自动生成
     }
     
     start() {
