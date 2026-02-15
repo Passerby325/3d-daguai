@@ -587,9 +587,9 @@ export class Boss extends Enemy {
     }
     
     updateUI() {
-        const bossHealthBar = document.getElementById('boss-health-bar');
-        const bossHealthFill = document.getElementById('boss-health-fill');
-        const bossName = document.getElementById('boss-name');
+        const bossHealthBar = document.getElementById(`boss-health-bar-${this.bossIndex}`);
+        const bossHealthFill = document.getElementById(`boss-health-fill-${this.bossIndex}`);
+        const bossName = document.getElementById(`boss-name-${this.bossIndex}`);
         
         if (bossHealthBar && bossHealthFill && bossName) {
             if (!this.isDead) {

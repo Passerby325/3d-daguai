@@ -12,6 +12,9 @@ export class Player {
         // 子弹系统
         this.bullets = 0;
         this.maxBullets = 50;
+        this.infiniteBullets = false;
+        this.secretCode = '';
+        this.secretCodeTarget = 'kkkk';
         this.pistol = null;
         this.isShooting = false;
         this.shootCooldown = 0;
@@ -82,6 +85,19 @@ export class Player {
     }
     
     onKeyDown(event) {
+        // 秘密指令检测 - 输入 kkkk 开启无限子弹
+        if (event.code === 'KeyK') {
+            this.secretCode += 'k';
+            if (this.secretCode.length > this.secretCodeTarget.length) {
+                this.secretCode = this.secretCode.slice(-this.secretCodeTarget.length);
+            }
+            if (this.secretCode === this.secretCodeTarget) {
+                this.infiniteBullets = !this.infiniteBullets;
+                this.showSecretMessage();
+                this.secretCode = '';
+            }
+        }
+        
         switch (event.code) {
             case 'KeyW': this.keys.w = true; break;
             case 'KeyA': this.keys.a = true; break;
@@ -231,7 +247,9 @@ export class Player {
         
         this.isShooting = true;
         this.shootCooldown = this.shootCooldownMax;
-        this.bullets--;
+        if (!this.infiniteBullets) {
+            this.bullets--;
+        }
         this.updateBulletUI();
         
         // 射击动画 - 手枪后坐力
@@ -258,44 +276,63 @@ export class Player {
         }, 100);
     }
     
+    showSecretMessage() {
+        const msg = document.createElement('div');
+        msg.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: ${this.infiniteBullets ? 'rgba(0, 255, 0, 0.9)' : 'rgba(255, 0, 0, 0.9)'};
+            color: white;
+            padding: 20px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 10px;
+            z-index: 10000;
+            animation: pulse 0.5s ease-in-out;
+        `;
+        msg.textContent = this.infiniteBullets ? '🔫 无限子弹已激活！' : '🔫 无限子弹已关闭';
+        document.body.appendChild(msg);
+        setTimeout(() => msg.remove(), 2000);
+    }
+    
     updateBulletUI() {
         const bulletNumElement = document.getElementById('bullet-num');
         if (bulletNumElement) {
-            bulletNumElement.textContent = this.bullets;
+            bulletNumElement.textContent = this.infiniteBullets ? '∞' : this.bullets;
         }
     }
     
     addBullets(amount) {
         this.bullets = Math.min(this.maxBullets, this.bullets + amount);
         this.updateBulletUI();
-        
-        // 显示获得子弹提示
-        const bulletText = document.createElement('div');
-        bulletText.style.cssText = `
+    }
+    
+    enhance() {
+        this.baseSpeed += 2;
+        this.sprintSpeed += 3;
+        this.showEnhanceMessage();
+    }
+    
+    showEnhanceMessage() {
+        const msg = document.createElement('div');
+        msg.style.cssText = `
             position: fixed;
-            top: 50%;
+            top: 30%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: #ffff00;
-            font-size: 24px;
+            background: rgba(255, 165, 0, 0.9);
+            color: white;
+            padding: 20px 40px;
+            font-size: 20px;
             font-weight: bold;
-            text-shadow: 0 0 10px rgba(255, 255, 0, 0.8);
-            pointer-events: none;
-            z-index: 500;
-            animation: bulletFloat 1s ease-out forwards;
+            border-radius: 10px;
+            z-index: 10000;
         `;
-        bulletText.textContent = `+${amount} 子弹`;
-        
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes bulletFloat {
-                0% { opacity: 1; transform: translate(-50%, -50%); }
-                100% { opacity: 0; transform: translate(-50%, -150%); }
-            }
-        `;
-        document.head.appendChild(style);
-        document.body.appendChild(bulletText);
-        setTimeout(() => bulletText.remove(), 1000);
+        msg.textContent = '⚡ 能力增强！速度+2 冲刺+3';
+        document.body.appendChild(msg);
+        setTimeout(() => msg.remove(), 2000);
     }
     
     onPointerLockChange() {

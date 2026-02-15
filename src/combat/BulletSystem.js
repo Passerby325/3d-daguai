@@ -116,11 +116,12 @@ export class BulletSystem {
 }
 
 export class BulletDrop {
-    constructor(scene, position) {
+    constructor(scene, position, bulletAmount = 1) {
         this.scene = scene;
         this.position = position.clone();
         this.position.y = 0.5;
         this.collected = false;
+        this.bulletAmount = bulletAmount;
         
         // 子弹模型
         const geometry = new THREE.CylinderGeometry(0.1, 0.1, 0.3, 8);
@@ -183,10 +184,11 @@ export class BulletDropManager {
     constructor(scene) {
         this.scene = scene;
         this.drops = [];
+        this.bulletDropAmount = 1;
     }
     
     createDrop(position) {
-        const drop = new BulletDrop(this.scene, position);
+        const drop = new BulletDrop(this.scene, position, this.bulletDropAmount);
         this.drops.push(drop);
     }
     
@@ -196,9 +198,10 @@ export class BulletDropManager {
             
             if (result === true) {
                 // 被收集
+                const amount = this.drops[i].bulletAmount;
                 this.drops[i].destroy();
                 this.drops.splice(i, 1);
-                return 1; // 返回1发子弹
+                return amount; // 返回收集的子弹数量
             } else if (result === false) {
                 // 超时销毁
                 this.drops[i].destroy();

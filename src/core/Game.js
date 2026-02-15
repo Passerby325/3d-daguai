@@ -80,6 +80,12 @@ export class Game {
         // 监听Boss死亡事件
         document.addEventListener('boss-defeated', () => {
             this.addBossKill();
+            // 增强玩家能力
+            this.player.enhance();
+            // 增加子弹掉落数量
+            if (this.bulletDropManager) {
+                this.bulletDropManager.bulletDropAmount += 1;
+            }
         });
         
         // 生成初始敌人
