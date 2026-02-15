@@ -66,7 +66,7 @@ export class BulletSystem {
         return bullet;
     }
     
-    update(delta, enemies, boss) {
+    update(delta, enemies, bosses) {
         for (let i = this.bullets.length - 1; i >= 0; i--) {
             const bullet = this.bullets[i];
             const alive = bullet.update(delta);
