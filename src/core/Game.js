@@ -271,8 +271,8 @@ export class Game {
         // 更新子弹系统
         if (this.bulletSystem) {
             const enemies = this.enemyManager.getEnemies();
-            const boss = this.enemyManager.boss;
-            this.bulletSystem.update(delta, enemies, boss);
+            const bosses = this.enemyManager.bosses;
+            this.bulletSystem.update(delta, enemies, bosses);
         }
         
         // 更新子弹掉落

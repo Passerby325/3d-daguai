@@ -80,8 +80,12 @@ export class BulletSystem {
             // 检测碰撞
             if (!bullet.hasHit) {
                 const allTargets = [...enemies];
-                if (boss && !boss.isDead) {
-                    allTargets.push(boss);
+                if (bosses && bosses.length > 0) {
+                    for (const boss of bosses) {
+                        if (boss && !boss.isDead) {
+                            allTargets.push(boss);
+                        }
+                    }
                 }
                 
                 for (const target of allTargets) {

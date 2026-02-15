@@ -13,9 +13,11 @@ const BossState = {
 };
 
 export class Boss extends Enemy {
-    constructor(scene, player, x, z) {
+    constructor(scene, player, x, z, bossIndex = 0) {
         // Boss基础属性比敌人强很多
         super(scene, player, x, z, 1);
+        
+        this.bossIndex = bossIndex;
         
         // 覆盖基础属性
         this.maxHealth = 500;
@@ -49,6 +51,9 @@ export class Boss extends Enemy {
         
         // 创建Boss专用的视觉效果
         this.createBossEffects();
+        
+        // 创建Boss UI
+        this.createBossUI();
         
         // 显示Boss警告
         this.showBossWarning();
@@ -140,25 +145,76 @@ export class Boss extends Enemy {
     }
     
     createHealthBar() {
-        // Boss血条比普通敌人更大，放在头顶上方
-        const bgGeo = new THREE.PlaneGeometry(4, 0.4);
-        const bgMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
-        const bg = new THREE.Mesh(bgGeo, bgMat);
-        bg.position.y = 12; // 放在Boss头顶
-        this.mesh.add(bg);
+        // Boss使用UI血条，不创建3D血条
+    }
+    
+    createBossUI() {
+        // 为每个Boss创建独立的UI元素
+        const bossHealthBar = document.createElement('div');
+        bossHealthBar.id = `boss-health-bar-${this.bossIndex}`;
+        bossHealthBar.style.cssText = `
+            position: absolute;
+            top: ${120 + this.bossIndex * 30}px;
+            right: 30px;
+            width: 300px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #ff0000;
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+        `;
         
-        // 血条填充
-        const fillGeo = new THREE.PlaneGeometry(4, 0.4);
-        const fillMat = new THREE.MeshStandardMaterial({ 
-            color: 0xff0000,
-            emissive: 0xff0000,
-            emissiveIntensity: 0.5
-        });
-        this.healthBar = new THREE.Mesh(fillGeo, fillMat);
-        this.healthBar.position.z = 0.01;
-        this.healthBar.position.y = 12;
-        this.healthBar.scale.x = 1;
-        this.mesh.add(this.healthBar);
+        const bossHealthFill = document.createElement('div');
+        bossHealthFill.id = `boss-health-fill-${this.bossIndex}`;
+        bossHealthFill.style.cssText = `
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff6600);
+            transition: width 0.3s;
+            width: 100%;
+        `;
+        
+        bossHealthBar.appendChild(bossHealthFill);
+        document.getElementById('ui-overlay').appendChild(bossHealthBar);
+        
+        this.uiBar = bossHealthBar;
+        this.uiFill = bossHealthFill;
+        
+        // 创建Boss名称
+        const bossName = document.createElement('div');
+        bossName.id = `boss-name-${this.bossIndex}`;
+        bossName.style.cssText = `
+            position: absolute;
+            top: ${100 + this.bossIndex * 30}px;
+            right: 30px;
+            color: #ff0000;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+            display: none;
+        `;
+        bossName.textContent = `★ BOSS ${this.bossIndex + 1} ★`;
+        document.getElementById('ui-overlay').appendChild(bossName);
+        
+        this.uiName = bossName;
+    }
+    
+    updateUI() {
+        if (!this.uiBar || !this.uiFill || !this.uiName) return;
+        
+        if (!this.isDead) {
+            this.uiBar.style.display = 'block';
+            this.uiName.style.display = 'block';
+            const healthPercent = Math.max(0, (this.health / this.maxHealth) * 100);
+            this.uiFill.style.width = `${healthPercent}%`;
+        } else {
+            this.uiFill.style.width = '0%';
+            setTimeout(() => {
+                this.uiBar.style.display = 'none';
+                this.uiName.style.display = 'none';
+            }, 500);
+        }
     }
     
     createBossEffects() {
@@ -237,12 +293,6 @@ export class Boss extends Enemy {
             // 脉冲效果
             const pulse = Math.sin(Date.now() * 0.003) * 0.1 + 1;
             this.auraRing.scale.set(pulse, pulse, 1);
-        }
-        
-        // 更新血条朝向
-        this.healthBar.lookAt(this.player.camera.position);
-        if (this.nameTag) {
-            this.nameTag.lookAt(this.player.camera.position);
         }
         
         // 更新UI血条
@@ -553,11 +603,8 @@ export class Boss extends Enemy {
         this.health -= amount;
         if (this.health < 0) this.health = 0; // 防止负数
         
-        // 更新血条
-        const healthPercent = Math.max(0, Math.min(1, this.health / this.maxHealth));
-        if (this.healthBar) {
-            this.healthBar.scale.x = healthPercent;
-        }
+        // 更新UI血条
+        this.updateUI();
         
         // 受击闪烁
         if (this.mesh && this.mesh.material) {

@@ -152,23 +152,33 @@ export class MiniMap {
     }
     
     updateBossBlip() {
-        const boss = this.enemyManager.boss;
+        const bosses = this.enemyManager.bosses;
+        const currentBlips = new Set();
         
-        if (boss && !boss.isDead && boss.mesh) {
-            try {
-                const bossPos = boss.getPosition();
-                
-                if (this.isInWorldBounds(bossPos.x, bossPos.z)) {
-                    const mapPos = this.worldToMap(bossPos.x, bossPos.z);
-                    this.createOrUpdateBlip('boss', mapPos, 'boss');
-                } else {
-                    this.removeBlip('boss');
+        if (bosses && bosses.length > 0) {
+            for (let i = 0; i < bosses.length; i++) {
+                const boss = bosses[i];
+                if (boss && !boss.isDead && boss.mesh) {
+                    try {
+                        const bossPos = boss.getPosition();
+                        
+                        if (this.isInWorldBounds(bossPos.x, bossPos.z)) {
+                            const mapPos = this.worldToMap(bossPos.x, bossPos.z);
+                            this.createOrUpdateBlip(`boss-${i}`, mapPos, 'boss');
+                            currentBlips.add(`boss-${i}`);
+                        }
+                    } catch (e) {
+                        console.error('更新Boss地图标记失败:', e);
+                    }
                 }
-            } catch (e) {
-                console.error('更新Boss地图标记失败:', e);
             }
-        } else {
-            this.removeBlip('boss');
+        }
+        
+        // 移除不存在的boss标记
+        for (const [id] of this.blipElements) {
+            if (id.startsWith('boss') && !currentBlips.has(id)) {
+                this.removeBlip(id);
+            }
         }
     }
     

@@ -64,7 +64,7 @@
         
         #boss-health-bar {
             position: absolute;
-            top: 100px;
+            top: 120px;
             right: 30px;
             width: 300px;
             height: 20px;
@@ -84,7 +84,7 @@
         
         #boss-name {
             position: absolute;
-            top: 80px;
+            top: 100px;
             right: 30px;
             color: #ff0000;
             font-size: 18px;
@@ -431,7 +431,7 @@
     <div id="game-container">
         <div id="ui-overlay">
             <div id="game-info" style="display: none;">
-                时间: <span id="game-time">00:00</span> | BOSS: <span id="boss-kills">0</span>
+                时间: <span id="game-time">00:00</span> | 击杀BOSS: <span id="boss-kills">0</span> | Boss刷新: <span id="boss-timer">0</span>秒
             </div>
             
             <div id="instructions">
@@ -461,11 +461,6 @@
             
             <div class="health-bar" id="stamina-bar" style="display: none;">
                 <div class="health-fill" id="stamina-fill" style="background: linear-gradient(90deg, #ffaa00, #ffdd00);"></div>
-            </div>
-            
-            <div id="boss-name" style="display: none;">★ BOSS ★</div>
-            <div id="boss-health-bar" style="display: none;">
-                <div id="boss-health-fill"></div>
             </div>
             
             <div class="crosshair" id="crosshair" style="display: none;"></div>

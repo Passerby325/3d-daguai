@@ -22,12 +22,16 @@ export class CombatSystem {
         
         // 获取所有敌人和Boss
         const enemies = this.enemyManager.getEnemies();
-        const boss = this.enemyManager.boss;
+        const bosses = this.enemyManager.bosses;
         
         // 创建检测对象数组（包括普通敌人和Boss）
         let allTargets = [...enemies];
-        if (boss && !boss.isDead) {
-            allTargets.push(boss);
+        if (bosses && bosses.length > 0) {
+            for (const boss of bosses) {
+                if (boss && !boss.isDead) {
+                    allTargets.push(boss);
+                }
+            }
         }
         
         // 找到在攻击范围内的最近目标
