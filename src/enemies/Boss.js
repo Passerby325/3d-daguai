@@ -149,9 +149,16 @@ export class Boss extends Enemy {
     }
     
     createBossUI() {
+        const uiOverlay = document.getElementById('ui-overlay');
+        if (!uiOverlay) {
+            console.error('ui-overlay not found');
+            return;
+        }
+        
         // 为每个Boss创建独立的UI元素
         const bossHealthBar = document.createElement('div');
         bossHealthBar.id = `boss-health-bar-${this.bossIndex}`;
+        bossHealthBar.className = 'boss-health-bar';
         bossHealthBar.style.cssText = `
             position: absolute;
             top: ${120 + this.bossIndex * 30}px;
@@ -162,8 +169,9 @@ export class Boss extends Enemy {
             border: 2px solid #ff0000;
             border-radius: 10px;
             overflow: hidden;
-            display: none;
+            display: block;
             box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+            z-index: 100;
         `;
         
         const bossHealthFill = document.createElement('div');
@@ -176,7 +184,7 @@ export class Boss extends Enemy {
         `;
         
         bossHealthBar.appendChild(bossHealthFill);
-        document.getElementById('ui-overlay').appendChild(bossHealthBar);
+        uiOverlay.appendChild(bossHealthBar);
         
         this.uiBar = bossHealthBar;
         this.uiFill = bossHealthFill;
@@ -192,10 +200,11 @@ export class Boss extends Enemy {
             font-size: 16px;
             font-weight: bold;
             text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
-            display: none;
+            display: block;
+            z-index: 100;
         `;
         bossName.textContent = `★ BOSS ${this.bossIndex + 1} ★`;
-        document.getElementById('ui-overlay').appendChild(bossName);
+        uiOverlay.appendChild(bossName);
         
         this.uiName = bossName;
     }

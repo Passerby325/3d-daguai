@@ -207,6 +207,9 @@ export class Game {
             
             this.enemyManager.spawnEnemy(x, z);
         }
+        
+        // 立即生成第一个Boss
+        this.enemyManager.spawnBoss();
     }
     
     start() {
