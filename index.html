@@ -204,11 +204,10 @@
             position: absolute;
             width: 2px;
             height: 12px;
-            background: rgba(0, 255, 0, 0.9);
+            background: rgba(0, 0, 0, 0.9);
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 5px rgba(0, 255, 0, 0.8);
         }
         
         .crosshair::after {
@@ -216,11 +215,10 @@
             position: absolute;
             width: 12px;
             height: 2px;
-            background: rgba(0, 255, 0, 0.9);
+            background: rgba(0, 0, 0, 0.9);
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 5px rgba(0, 255, 0, 0.8);
         }
         
         #instructions {
@@ -319,6 +317,20 @@
             text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
         }
         
+        #game-info {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 30px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
         .damage-text {
             position: absolute;
             color: #ff3333;
@@ -389,6 +401,10 @@
 <body>
     <div id="game-container">
         <div id="ui-overlay">
+            <div id="game-info" style="display: none;">
+                时间: <span id="game-time">00:00</span> | BOSS: <span id="boss-kills">0</span>
+            </div>
+            
             <div id="instructions">
                 <h2>🎮 daguai</h2>
                 <p>点击开始游戏，进入3D世界</p>
@@ -486,6 +502,7 @@
             document.getElementById('weapon-display').style.display='block';
             document.getElementById('mirror-toggle').style.display='block';
             document.getElementById('minimap').style.display='block';
+            document.getElementById('game-info').style.display='block';
             
             if(typeof window.startGame === 'function') {
                 window.startGame();

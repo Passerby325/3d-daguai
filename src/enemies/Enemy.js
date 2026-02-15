@@ -414,8 +414,8 @@ export class Enemy {
         
         this.showDialogue("啊...我输了...");
         
-        // 击杀小怪回血（最大生命值的十分之一）
-        const healAmount = Math.ceil(this.player.maxHealth / 10);
+        // 击杀小怪回血（最大生命值的五分之一）
+        const healAmount = Math.ceil(this.player.maxHealth / 5);
         this.player.heal(healAmount);
         
         // 延迟销毁

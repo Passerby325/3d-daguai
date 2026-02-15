@@ -19,6 +19,8 @@ export class Game {
         this.minimap = null;
         this.bulletSystem = null;
         this.bulletDropManager = null;
+        this.gameTime = 0;
+        this.bossKillCount = 0;
         
         this.init();
     }
@@ -85,6 +87,7 @@ export class Game {
             if (bossName) {
                 bossName.style.display = 'none';
             }
+            this.addBossKill();
         });
         
         // 生成初始敌人
@@ -226,6 +229,26 @@ export class Game {
         }
     }
     
+    updateGameInfo() {
+        const timeElement = document.getElementById('game-time');
+        const bossElement = document.getElementById('boss-kills');
+        
+        if (timeElement) {
+            const minutes = Math.floor(this.gameTime / 60);
+            const seconds = Math.floor(this.gameTime % 60);
+            timeElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        if (bossElement) {
+            bossElement.textContent = this.bossKillCount;
+        }
+    }
+    
+    addBossKill() {
+        this.bossKillCount++;
+        this.updateGameInfo();
+    }
+    
     animate() {
         if (!this.isRunning || this.isPaused) {
             return;
@@ -234,6 +257,12 @@ export class Game {
         requestAnimationFrame(() => this.animate());
         
         const delta = this.clock.getDelta();
+        
+        // 更新游戏时间
+        if (!this.isPaused) {
+            this.gameTime += delta;
+            this.updateGameInfo();
+        }
         
         // 更新玩家
         this.player.update(delta);

@@ -7,6 +7,7 @@ console.log('main.js 加载成功');
 let game;
 try {
     game = new Game();
+    window.game = game; // 暴露到全局
     console.log('游戏初始化成功');
 } catch (e) {
     console.error('游戏初始化失败:', e);

@@ -505,8 +505,43 @@ export class Player {
     
     die() {
         this.isDead = true;
-        alert('游戏结束！按F5重新开始');
-        location.reload();
+        
+        // 获取游戏信息
+        let gameTimeStr = '00:00';
+        let bossKills = 0;
+        
+        if (typeof window.game !== 'undefined' && window.game) {
+            const game = window.game;
+            const minutes = Math.floor(game.gameTime / 60);
+            const seconds = Math.floor(game.gameTime % 60);
+            gameTimeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            bossKills = game.bossKillCount || 0;
+        }
+        
+        // 显示游戏结束画面
+        const gameOverDiv = document.createElement('div');
+        gameOverDiv.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        `;
+        
+        gameOverDiv.innerHTML = `
+            <h1 style="color: #ff0000; font-size: 60px; margin-bottom: 30px;">游戏结束</h1>
+            <p style="color: #ffffff; font-size: 24px; margin: 10px 0;">存活时间: ${gameTimeStr}</p>
+            <p style="color: #ffff00; font-size: 24px; margin: 10px 0;">击杀BOSS: ${bossKills}</p>
+            <button onclick="location.reload()" style="margin-top: 40px; padding: 15px 40px; font-size: 20px; cursor: pointer;">重新开始</button>
+        `;
+        
+        document.body.appendChild(gameOverDiv);
     }
     
     updateStaminaBar() {
