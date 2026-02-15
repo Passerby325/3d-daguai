@@ -207,6 +207,12 @@ export class Game {
             
             this.enemyManager.spawnEnemy(x, z);
         }
+        
+        // 根据设置生成初始Boss
+        const bossCount = this.gameSettings.bossCount || 1;
+        for (let i = 0; i < bossCount; i++) {
+            this.enemyManager.spawnBoss();
+        }
     }
     
     start() {
