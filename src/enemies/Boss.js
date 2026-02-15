@@ -140,11 +140,11 @@ export class Boss extends Enemy {
     }
     
     createHealthBar() {
-        // Boss血条比普通敌人更大
+        // Boss血条比普通敌人更大，放在头顶上方
         const bgGeo = new THREE.PlaneGeometry(4, 0.4);
         const bgMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
         const bg = new THREE.Mesh(bgGeo, bgMat);
-        bg.position.y = 4.5;
+        bg.position.y = 12; // 放在Boss头顶
         this.mesh.add(bg);
         
         // 血条填充
@@ -156,7 +156,7 @@ export class Boss extends Enemy {
         });
         this.healthBar = new THREE.Mesh(fillGeo, fillMat);
         this.healthBar.position.z = 0.01;
-        this.healthBar.position.y = 4.5;
+        this.healthBar.position.y = 12;
         this.healthBar.scale.x = 1;
         this.mesh.add(this.healthBar);
     }
