@@ -3,6 +3,7 @@ import { Player } from '../player/Player.js';
 import { EnemyManager } from '../enemies/EnemyManager.js';
 import { CombatSystem } from '../combat/CombatSystem.js';
 import { MiniMap } from '../ui/MiniMap.js';
+import { BulletSystem, BulletDropManager } from '../combat/BulletSystem.js';
 
 export class Game {
     constructor() {
@@ -16,6 +17,8 @@ export class Game {
         this.enemyManager = null;
         this.combatSystem = null;
         this.minimap = null;
+        this.bulletSystem = null;
+        this.bulletDropManager = null;
         
         this.init();
     }
@@ -87,7 +90,27 @@ export class Game {
         // 生成初始敌人
         console.log('生成初始敌人...');
         this.spawnInitialEnemies();
+        
+        // 创建子弹系统
+        this.bulletSystem = new BulletSystem(this.scene);
+        this.bulletDropManager = new BulletDropManager(this.scene);
+        
+        // 监听射击事件
+        document.addEventListener('player-shoot', (e) => this.handlePlayerShoot(e));
+        
+        // 监听敌人掉落子弹事件
+        document.addEventListener('enemy-drop-bullet', (e) => {
+            if (this.bulletDropManager) {
+                this.bulletDropManager.createDrop(e.detail.position);
+            }
+        });
+        
         console.log('Game.init() 完成');
+    }
+    
+    handlePlayerShoot(event) {
+        const { position, direction } = event.detail;
+        this.bulletSystem.shoot(position, direction);
     }
     
     setupLighting() {
@@ -195,9 +218,16 @@ export class Game {
         this.animate();
     }
     
+    setPaused(paused) {
+        this.isPaused = paused;
+        if (!paused) {
+            this.clock.getDelta(); // 重置时钟
+            this.animate();
+        }
+    }
+    
     animate() {
-        if (!this.isRunning) {
-            console.log('游戏已停止');
+        if (!this.isRunning || this.isPaused) {
             return;
         }
         
@@ -213,6 +243,21 @@ export class Game {
         
         // 更新战斗系统
         this.combatSystem.update(delta);
+        
+        // 更新子弹系统
+        if (this.bulletSystem) {
+            const enemies = this.enemyManager.getEnemies();
+            const boss = this.enemyManager.boss;
+            this.bulletSystem.update(delta, enemies, boss);
+        }
+        
+        // 更新子弹掉落
+        if (this.bulletDropManager) {
+            const collected = this.bulletDropManager.update(delta, this.player.getPosition());
+            if (collected > 0) {
+                this.player.addBullets(collected);
+            }
+        }
         
         // 更新雷达
         if (this.minimap) {

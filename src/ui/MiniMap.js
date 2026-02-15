@@ -21,6 +21,9 @@ export class MiniMap {
         this.blipElements = new Map();
         this.fovElement = null; // 视野范围元素
         
+        // 镜像开关（默认开启）
+        this.mapMirror = true;
+        
         this.init();
     }
     
@@ -64,8 +67,12 @@ export class MiniMap {
         
         // 计算XZ平面上的旋转角度
         // Three.js中相机朝向-Z时，在地图上应显示为指向上方（0度）
-        const rotation = Math.atan2(-forward.x, -forward.z);
-      
+        let rotation = Math.atan2(-forward.x, -forward.z);
+        
+        // 镜像模式下翻转旋转方向
+        if (this.mapMirror) {
+            rotation = -rotation;
+        }
         
         const mapPos = this.worldToMap(playerPos.x, playerPos.z);
         
@@ -166,8 +173,13 @@ export class MiniMap {
     }
     
     worldToMap(worldX, worldZ) {
-        const mapX = ((worldX - this.worldMinX) / this.worldWidth) * this.mapSize;
+        let mapX = ((worldX - this.worldMinX) / this.worldWidth) * this.mapSize;
         const mapY = ((this.worldMaxZ - worldZ) / this.worldHeight) * this.mapSize;
+        
+        // 镜像处理
+        if (this.mapMirror) {
+            mapX = this.mapSize - mapX;
+        }
         
         return { x: mapX, y: mapY };
     }
@@ -227,5 +239,10 @@ export class MiniMap {
         if (this.mapElement) {
             this.mapElement.style.display = 'none';
         }
+    }
+    
+    toggleMirror() {
+        this.mapMirror = !this.mapMirror;
+        console.log('地图镜像模式:', this.mapMirror ? '开启' : '关闭');
     }
 }

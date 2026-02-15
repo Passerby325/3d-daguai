@@ -170,9 +170,16 @@ export class EnemyManager {
     
     removeEnemy(index) {
         const enemy = this.enemies[index];
+        const position = enemy.getPosition().clone();
         enemy.destroy();
         this.enemies.splice(index, 1);
         this.updateEnemyCount();
+        
+        // 掉落子弹
+        const dropEvent = new CustomEvent('enemy-drop-bullet', {
+            detail: { position: position }
+        });
+        document.dispatchEvent(dropEvent);
     }
     
     updateEnemyCount() {

@@ -37,4 +37,57 @@ window.startGame = function() {
     }
 };
 
+// 全局镜像开关函数
+window.toggleMinimapMirror = function() {
+    if (game && game.minimap) {
+        game.minimap.toggleMirror();
+    } else {
+        console.warn('minimap 未初始化');
+    }
+};
+
+// 暂停功能
+let isPaused = false;
+window.togglePause = function() {
+    isPaused = !isPaused;
+    const pauseMenu = document.getElementById('pause-menu');
+    
+    if (isPaused) {
+        pauseMenu.style.display = 'flex';
+        document.exitPointerLock();
+    } else {
+        pauseMenu.style.display = 'none';
+        // 安全地请求指针锁定
+        if (document.body) {
+            document.body.requestPointerLock().catch(() => {});
+        }
+    }
+    
+    if (game) {
+        game.setPaused(isPaused);
+    }
+};
+
+// 点击暂停菜单继续游戏
+document.getElementById('pause-menu').addEventListener('click', function() {
+    if (isPaused) {
+        isPaused = false;
+        document.getElementById('pause-menu').style.display = 'none';
+        // 安全地请求指针锁定
+        document.body.requestPointerLock().catch(() => {});
+        if (game) {
+            game.setPaused(false);
+        }
+    }
+});
+
+// ESC按键直接暂停（使用keydown确保在指针未锁定时也能检测）
+document.addEventListener('keydown', function(e) {
+    if (e.code === 'Escape') {
+        // 阻止默认行为
+        e.preventDefault();
+        window.togglePause();
+    }
+});
+
 console.log('main.js 完全加载');

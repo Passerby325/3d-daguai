@@ -8,6 +8,14 @@ export class Player {
         this.health = 100;
         this.maxHealth = 100;
         this.speed = this.baseSpeed;
+        
+        // 子弹系统
+        this.bullets = 0;
+        this.maxBullets = 50;
+        this.pistol = null;
+        this.isShooting = false;
+        this.shootCooldown = 0;
+        this.shootCooldownMax = 0.3; // 0.3秒射击冷却
         this.jumpForce = 10;
         this.gravity = 30;
         
@@ -22,14 +30,20 @@ export class Player {
         this.attackCooldown = 0;
         this.attackCooldownMax = 0.2; // 0.2秒的攻击CD
         
+        // 武器系统
+        this.currentWeapon = 'sword'; // 当前武器: pistol 或 sword
+        this.hasPistol = true;
+        this.hasSword = true;
+        
         // 体力系统
         this.stamina = 100;
         this.maxStamina = 100;
         this.staminaDrainRate = 30; // 每秒消耗体力
         this.staminaRegenRate = 15; // 每秒恢复体力
         this.isSprinting = false;
+        this.staminaDepleted = false; // 体力是否耗尽
         this.baseSpeed = 10;
-        this.sprintSpeed = 18;
+        this.sprintSpeed = 25;
         
         this.keys = {
             w: false,
@@ -49,6 +63,9 @@ export class Player {
         
         this.setupControls();
         this.createWeapon();
+        this.createPistol();
+        this.updateBulletUI();
+        this.updateWeaponUI();
     }
     
     setupControls() {
@@ -80,8 +97,10 @@ export class Player {
             case 'ShiftRight':
                 this.keys.shift = true;
                 break;
-            case 'Escape':
-                this.unlockPointer();
+            case 'KeyM':
+                if (typeof window.toggleMinimapMirror === 'function') {
+                    window.toggleMinimapMirror();
+                }
                 break;
         }
     }
@@ -115,11 +134,49 @@ export class Player {
     }
     
     onMouseDown(event) {
-        if (event.button === 0 && document.pointerLockElement === document.body) {
-            // 检查攻击CD
-            if (this.attackCooldown <= 0) {
-                this.attack();
+        if (document.pointerLockElement === document.body) {
+            // 左键 - 攻击
+            if (event.button === 0) {
+                if (this.currentWeapon === 'sword') {
+                    if (this.attackCooldown <= 0) {
+                        this.attack();
+                    }
+                } else if (this.currentWeapon === 'pistol') {
+                    if (this.shootCooldown <= 0 && this.bullets > 0) {
+                        this.shoot();
+                    }
+                }
             }
+            // 右键 - 切换武器
+            else if (event.button === 2) {
+                this.switchWeapon();
+            }
+        }
+    }
+    
+    switchWeapon() {
+        if (this.currentWeapon === 'pistol') {
+            this.currentWeapon = 'sword';
+        } else {
+            this.currentWeapon = 'pistol';
+        }
+        
+        // 显示/隐藏对应武器
+        if (this.weapon) {
+            this.weapon.visible = (this.currentWeapon === 'sword');
+        }
+        if (this.pistol) {
+            this.pistol.visible = (this.currentWeapon === 'pistol');
+        }
+        
+        // 更新UI显示
+        this.updateWeaponUI();
+    }
+    
+    updateWeaponUI() {
+        const weaponText = document.getElementById('weapon-text');
+        if (weaponText) {
+            weaponText.textContent = this.currentWeapon === 'sword' ? '剑' : '手枪';
         }
     }
     
@@ -169,6 +226,78 @@ export class Player {
         document.dispatchEvent(attackEvent);
     }
     
+    shoot() {
+        if (this.bullets <= 0 || this.isShooting) return;
+        
+        this.isShooting = true;
+        this.shootCooldown = this.shootCooldownMax;
+        this.bullets--;
+        this.updateBulletUI();
+        
+        // 射击动画 - 手枪后坐力
+        if (this.pistol) {
+            const originalPos = this.pistol.position.clone();
+            this.pistol.position.z -= 0.1;
+            
+            setTimeout(() => {
+                this.pistol.position.copy(originalPos);
+            }, 100);
+        }
+        
+        // 触发射击事件
+        const shootEvent = new CustomEvent('player-shoot', {
+            detail: {
+                position: this.camera.position.clone(),
+                direction: new THREE.Vector3(0, 0, -1).applyQuaternion(this.camera.quaternion)
+            }
+        });
+        document.dispatchEvent(shootEvent);
+        
+        setTimeout(() => {
+            this.isShooting = false;
+        }, 100);
+    }
+    
+    updateBulletUI() {
+        const bulletNumElement = document.getElementById('bullet-num');
+        if (bulletNumElement) {
+            bulletNumElement.textContent = this.bullets;
+        }
+    }
+    
+    addBullets(amount) {
+        this.bullets = Math.min(this.maxBullets, this.bullets + amount);
+        this.updateBulletUI();
+        
+        // 显示获得子弹提示
+        const bulletText = document.createElement('div');
+        bulletText.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffff00;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 255, 0, 0.8);
+            pointer-events: none;
+            z-index: 500;
+            animation: bulletFloat 1s ease-out forwards;
+        `;
+        bulletText.textContent = `+${amount} 子弹`;
+        
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes bulletFloat {
+                0% { opacity: 1; transform: translate(-50%, -50%); }
+                100% { opacity: 0; transform: translate(-50%, -150%); }
+            }
+        `;
+        document.head.appendChild(style);
+        document.body.appendChild(bulletText);
+        setTimeout(() => bulletText.remove(), 1000);
+    }
+    
     onPointerLockChange() {
         if (document.pointerLockElement !== document.body) {
             // 游戏暂停
@@ -211,11 +340,43 @@ export class Player {
         
         this.camera.add(weaponGroup);
         this.weapon = weaponGroup;
+        this.weapon.visible = true; // 初始显示剑
         
         // 相机应该已经在场景中了，不需要再次添加
         if (!this.camera.parent) {
             this.scene.add(this.camera);
         }
+    }
+    
+    createPistol() {
+        const pistolGroup = new THREE.Group();
+        
+        // 枪身
+        const bodyGeo = new THREE.BoxGeometry(0.08, 0.12, 0.25);
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+        const body = new THREE.Mesh(bodyGeo, bodyMat);
+        body.position.set(0.25, -0.25, -0.4);
+        pistolGroup.add(body);
+        
+        // 枪管
+        const barrelGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.2, 8);
+        const barrelMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+        const barrel = new THREE.Mesh(barrelGeo, barrelMat);
+        barrel.rotation.x = Math.PI / 2;
+        barrel.position.set(0.25, -0.22, -0.55);
+        pistolGroup.add(barrel);
+        
+        // 枪柄
+        const gripGeo = new THREE.BoxGeometry(0.06, 0.15, 0.08);
+        const gripMat = new THREE.MeshStandardMaterial({ color: 0x4a3728 });
+        const grip = new THREE.Mesh(gripGeo, gripMat);
+        grip.position.set(0.25, -0.35, -0.32);
+        grip.rotation.x = 0.3;
+        pistolGroup.add(grip);
+        
+        this.camera.add(pistolGroup);
+        this.pistol = pistolGroup;
+        this.pistol.visible = false; // 初始隐藏手枪
     }
     
     update(delta) {
@@ -224,12 +385,21 @@ export class Player {
             this.attackCooldown -= delta;
         }
         
+        // 更新射击冷却
+        if (this.shootCooldown > 0) {
+            this.shootCooldown -= delta;
+        }
+        
         // 处理体力系统
-        this.isSprinting = this.keys.shift && this.stamina > 0 && this.direction.length() > 0;
+        // 只有按住shift且体力充足且未耗尽时才能加速
+        this.isSprinting = this.keys.shift && this.stamina > 0 && !this.staminaDepleted && this.direction.length() > 0;
         
         if (this.isSprinting) {
             this.stamina -= this.staminaDrainRate * delta;
-            if (this.stamina < 0) this.stamina = 0;
+            if (this.stamina <= 0) {
+                this.stamina = 0;
+                this.staminaDepleted = true; // 体力耗尽，必须松开shift
+            }
         } else if (this.direction.length() === 0) {
             // 站立时恢复体力
             this.stamina += this.staminaRegenRate * delta;
@@ -238,6 +408,11 @@ export class Player {
             // 行走时恢复体力较慢
             this.stamina += this.staminaRegenRate * 0.5 * delta;
             if (this.stamina > this.maxStamina) this.stamina = this.maxStamina;
+        }
+        
+        // 如果体力恢复超过10%，则解除耗尽状态
+        if (this.stamina > 10) {
+            this.staminaDepleted = false;
         }
         
         // 更新体力条

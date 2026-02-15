@@ -293,6 +293,32 @@
             text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
         }
         
+        #bullet-count {
+            position: absolute;
+            top: 320px;
+            left: 20px;
+            color: #ffff00;
+            font-size: 18px;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+        }
+        
+        #weapon-display {
+            position: absolute;
+            top: 360px;
+            left: 20px;
+            color: #00ffff;
+            font-size: 18px;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+        
         .damage-text {
             position: absolute;
             color: #ff3333;
@@ -333,15 +359,41 @@
             color: #fff;
             font-weight: bold;
         }
+        
+        #pause-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 10000;
+        }
+        
+        #pause-menu h2 {
+            color: #fff;
+            font-size: 48px;
+            margin-bottom: 30px;
+        }
+        
+        #pause-menu p {
+            color: #aaa;
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
     <div id="game-container">
         <div id="ui-overlay">
             <div id="instructions">
-                <h2>🎮 3D RPG - AI智能敌人</h2>
+                <h2>🎮 daguai</h2>
                 <p>点击开始游戏，进入3D世界</p>
-                <p><span class="key">WASD</span> 移动 | <span class="key">鼠标</span> 视角 | <span class="key">左键</span> 攻击</p>
+                <p><span class="key">WASD</span> 移动 | <span class="key">鼠标</span> 视角 | <span class="key">左键</span> 攻击 | <span class="key">右键</span> 切换武器</p>
+                | <span class="key">Shift</span> 加速 | <span class="key">M</span> 地图模式 | 
                 <p><span class="key">空格</span> 跳跃 | <span class="key">ESC</span> 暂停</p>
                 <button id="start-btn" onclick="startGameHandler()">开始游戏</button>
             </div>
@@ -364,6 +416,14 @@
                 击杀: <span id="kill-num">0</span>
             </div>
             
+            <div id="bullet-count" style="display: none;">
+                子弹: <span id="bullet-num">0</span>
+            </div>
+            
+            <div id="weapon-display" style="display: none;">
+                武器: <span id="weapon-text">剑</span>
+            </div>
+            
             <div id="ai-dialogue"></div>
             
             <div id="boss-name">★ BOSS ★</div>
@@ -377,6 +437,14 @@
                 <div id="minimap-player"></div>
                 <div class="minimap-label">200m</div>
             </div>
+            
+            <button id="mirror-toggle" style="display: none;"></button>
+        </div>
+        
+        <div id="pause-menu">
+            <h2>暂停</h2>
+            <p>点击任意位置继续游戏</p>
+        
         </div>
     </div>
 
@@ -389,7 +457,7 @@
         }
     </script>
     
-    <script type="module" src="src/main.js?v=23"></script>
+    <script type="module" src="src/main.js?v=24"></script>
     
     <script>
         // 调试脚本
@@ -414,6 +482,9 @@
             document.getElementById('crosshair').style.display='block';
             document.getElementById('enemy-count').style.display='block';
             document.getElementById('kill-count').style.display='block';
+            document.getElementById('bullet-count').style.display='block';
+            document.getElementById('weapon-display').style.display='block';
+            document.getElementById('mirror-toggle').style.display='block';
             document.getElementById('minimap').style.display='block';
             
             if(typeof window.startGame === 'function') {
@@ -423,6 +494,13 @@
                 alert('游戏模块还在加载，请稍等后重试');
             }
         }
+        
+        // 镜像开关按钮点击事件
+        document.getElementById('mirror-toggle').addEventListener('click', function() {
+            if (typeof window.toggleMinimapMirror === 'function') {
+                window.toggleMinimapMirror();
+            }
+        });
         
         console.log('调试脚本已加载');
     </script>

@@ -280,12 +280,10 @@ export class Boss extends Enemy {
         } else if (distanceToPlayer < this.attackRange) {
             this.bossState = BossState.ATTACK;
             this.updateAttack(delta);
-        } else if (distanceToPlayer < this.detectionRange) {
+        } else {
+            // Boss始终追击玩家，不受距离限制
             this.bossState = BossState.CHASE;
             this.updateChase(delta);
-        } else {
-            this.bossState = BossState.IDLE;
-            this.velocity.set(0, 0, 0);
         }
         
         // 更新位置
