@@ -140,6 +140,7 @@ export class EnemyManager {
             if (enemy.isDead) {
                 this.killCount++;
                 this.updateKillCount();
+                this.player.healStamina(15);
                 this.removeEnemy(i);
             }
         }

@@ -7,7 +7,7 @@ export class Player {
         
         this.health = 100;
         this.maxHealth = 100;
-        this.speed = 10;
+        this.speed = this.baseSpeed;
         this.jumpForce = 10;
         this.gravity = 30;
         
@@ -20,14 +20,24 @@ export class Player {
         this.canJump = false;
         this.isDead = false;
         this.attackCooldown = 0;
-        this.attackCooldownMax = 0.5; // 0.5秒的攻击CD
+        this.attackCooldownMax = 0.2; // 0.2秒的攻击CD
+        
+        // 体力系统
+        this.stamina = 100;
+        this.maxStamina = 100;
+        this.staminaDrainRate = 30; // 每秒消耗体力
+        this.staminaRegenRate = 15; // 每秒恢复体力
+        this.isSprinting = false;
+        this.baseSpeed = 10;
+        this.sprintSpeed = 18;
         
         this.keys = {
             w: false,
             a: false,
             s: false,
             d: false,
-            space: false
+            space: false,
+            shift: false
         };
         
         this.mouse = {
@@ -66,6 +76,10 @@ export class Player {
                     this.canJump = false;
                 }
                 break;
+            case 'ShiftLeft':
+            case 'ShiftRight':
+                this.keys.shift = true;
+                break;
             case 'Escape':
                 this.unlockPointer();
                 break;
@@ -78,6 +92,10 @@ export class Player {
             case 'KeyA': this.keys.a = false; break;
             case 'KeyS': this.keys.s = false; break;
             case 'KeyD': this.keys.d = false; break;
+            case 'ShiftLeft':
+            case 'ShiftRight':
+                this.keys.shift = false;
+                break;
         }
     }
     
@@ -206,8 +224,27 @@ export class Player {
             this.attackCooldown -= delta;
         }
         
-        // 更新攻击冷却进度条
-        this.updateCooldownBar();
+        // 处理体力系统
+        this.isSprinting = this.keys.shift && this.stamina > 0 && this.direction.length() > 0;
+        
+        if (this.isSprinting) {
+            this.stamina -= this.staminaDrainRate * delta;
+            if (this.stamina < 0) this.stamina = 0;
+        } else if (this.direction.length() === 0) {
+            // 站立时恢复体力
+            this.stamina += this.staminaRegenRate * delta;
+            if (this.stamina > this.maxStamina) this.stamina = this.maxStamina;
+        } else {
+            // 行走时恢复体力较慢
+            this.stamina += this.staminaRegenRate * 0.5 * delta;
+            if (this.stamina > this.maxStamina) this.stamina = this.maxStamina;
+        }
+        
+        // 更新体力条
+        this.updateStaminaBar();
+        
+        // 设置速度
+        this.speed = this.isSprinting ? this.sprintSpeed : this.baseSpeed;
         
         // 计算移动方向
         this.direction.set(0, 0, 0);
@@ -297,14 +334,11 @@ export class Player {
         location.reload();
     }
     
-    updateCooldownBar() {
-        const cooldownFill = document.getElementById('attack-cooldown-fill');
-        if (cooldownFill) {
-            // 冷却中显示剩余比例，冷却完成显示100%
-            const percent = this.attackCooldown > 0 
-                ? ((this.attackCooldownMax - this.attackCooldown) / this.attackCooldownMax) * 100 
-                : 100;
-            cooldownFill.style.width = `${percent}%`;
+    updateStaminaBar() {
+        const staminaFill = document.getElementById('stamina-fill');
+        if (staminaFill) {
+            const percent = (this.stamina / this.maxStamina) * 100;
+            staminaFill.style.width = `${percent}%`;
         }
     }
     
@@ -346,6 +380,11 @@ export class Player {
         
         document.body.appendChild(healText);
         setTimeout(() => healText.remove(), 1000);
+    }
+    
+    healStamina(amount) {
+        this.stamina = Math.min(this.maxStamina, this.stamina + amount);
+        this.updateStaminaBar();
     }
     
     getPosition() {

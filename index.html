@@ -54,23 +54,12 @@
             transition: width 0.3s;
         }
         
-        #attack-cooldown-bar {
+        #stamina-bar {
             position: absolute;
             bottom: 60px;
             left: 30px;
             width: 200px;
-            height: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 2px solid #00ffff;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        
-        #attack-cooldown-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00ffff, #00aaaa);
-            width: 100%;
-            transition: width 0.1s linear;
+            height: 15px;
         }
         
         #boss-health-bar {
@@ -361,8 +350,8 @@
                 <div class="health-fill" id="health-fill"></div>
             </div>
             
-            <div id="attack-cooldown-bar" style="display: none;">
-                <div id="attack-cooldown-fill"></div>
+            <div class="health-bar" id="stamina-bar" style="display: none;">
+                <div class="health-fill" id="stamina-fill" style="background: linear-gradient(90deg, #ffaa00, #ffdd00);"></div>
             </div>
             
             <div class="crosshair" id="crosshair" style="display: none;"></div>
@@ -421,7 +410,7 @@
             console.log('按钮被点击');
             document.getElementById('instructions').style.display='none';
             document.getElementById('player-health').style.display='block';
-            document.getElementById('attack-cooldown-bar').style.display='block';
+            document.getElementById('stamina-bar').style.display='block';
             document.getElementById('crosshair').style.display='block';
             document.getElementById('enemy-count').style.display='block';
             document.getElementById('kill-count').style.display='block';
