@@ -506,6 +506,9 @@ export class Player {
     die() {
         this.isDead = true;
         
+        // 退出指针锁定
+        document.exitPointerLock();
+        
         // 获取游戏信息
         let gameTimeStr = '00:00';
         let bossKills = 0;
