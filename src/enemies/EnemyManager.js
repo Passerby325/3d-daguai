@@ -13,8 +13,7 @@ export class EnemyManager {
         this.bossSpawnInterval = settings.bossInterval || 10; // 每10秒生成一个Boss
         this.bossCount = settings.bossCount || 1; // Boss数量
         this.bossDefeatedCount = 0;
-        this.bossesToSpawn = this.bossCount; // 剩余需要生成的Boss数量
-        this.nextBossSpawnTime = this.bossSpawnInterval; // 下次boss刷新时间
+        this.bossCounter = 0; // 用于追踪Boss索引
         
         // 难度系统
         this.gameTime = 0;
@@ -75,7 +74,7 @@ export class EnemyManager {
             levelDisplay.textContent = this.difficultyLevel;
         }
         
-        // Boss生成逻辑 - 只有当所有boss都死亡时才生成
+        // Boss生成逻辑 - 多个Boss可以同时存在
         this.bossSpawnTimer += delta;
         
         // 更新boss刷新时间显示
@@ -85,9 +84,9 @@ export class EnemyManager {
             timerElement.textContent = Math.ceil(remainingTime);
         }
         
-        // 只有当没有存活的Boss时才生成
-        const aliveBosses = this.bosses.filter(b => b && !b.isDead);
-        if (aliveBosses.length === 0 && this.bossSpawnTimer >= this.bossSpawnInterval) {
+        // 当刷新时间到达时，如果Boss数量少于设置的Boss数量，则生成
+        const aliveBosses = this.bosses.filter(b => b && !b.isDead).length;
+        if (this.bossSpawnTimer >= this.bossSpawnInterval && aliveBosses < this.bossCount) {
             this.spawnBoss();
             this.bossSpawnTimer = 0;
         }
@@ -225,7 +224,8 @@ export class EnemyManager {
             );
         } while (distance < 10); // 确保不在玩家10米内
         
-        const newBoss = new Boss(this.scene, this.player, x, z, this.bosses.length);
+        const newBoss = new Boss(this.scene, this.player, x, z, this.bossCounter);
+        this.bossCounter++;
         this.bosses.push(newBoss);
         this.updateEnemyCount();
         
