@@ -139,6 +139,7 @@ export class EnemyManager {
             // 检查敌人是否死亡
             if (enemy.isDead) {
                 this.killCount++;
+                this.updateKillCount();
                 this.removeEnemy(i);
             }
         }
@@ -177,6 +178,13 @@ export class EnemyManager {
         const enemyNumElement = document.getElementById('enemy-num');
         if (enemyNumElement) {
             enemyNumElement.textContent = this.enemies.length + (this.boss ? 1 : 0);
+        }
+    }
+    
+    updateKillCount() {
+        const killNumElement = document.getElementById('kill-num');
+        if (killNumElement) {
+            killNumElement.textContent = this.killCount;
         }
     }
     

@@ -272,6 +272,19 @@
             border-radius: 5px;
         }
         
+        #kill-count {
+            position: absolute;
+            top: 280px;
+            left: 20px;
+            color: #ffcc00;
+            font-size: 18px;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+        }
+        
         .damage-text {
             position: absolute;
             color: #ff3333;
@@ -335,6 +348,10 @@
                 敌人数量: <span id="enemy-num">0</span>
             </div>
             
+            <div id="kill-count" style="display: none;">
+                击杀: <span id="kill-num">0</span>
+            </div>
+            
             <div id="ai-dialogue"></div>
             
             <div id="boss-name">★ BOSS ★</div>
@@ -383,6 +400,7 @@
             document.getElementById('player-health').style.display='block';
             document.getElementById('crosshair').style.display='block';
             document.getElementById('enemy-count').style.display='block';
+            document.getElementById('kill-count').style.display='block';
             document.getElementById('minimap').style.display='block';
             
             if(typeof window.startGame === 'function') {
