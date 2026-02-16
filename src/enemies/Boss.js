@@ -39,14 +39,14 @@ export class Boss extends Enemy {
         this.chargeCooldown = 0;
         this.chargeInterval = 8;
         this.smashCooldown = 0;
-        this.smashInterval = 12;
+        this.smashInterval = 8;
         this.summonCooldown = 0;
         this.summonInterval = 15;
         
         // 冲锋技能属性
         this.isCharging = false;
         this.chargeDirection = null;
-        this.chargeSpeed = 20;
+        this.chargeSpeed = 35;
         this.chargeDuration = 0;
         
         // 创建Boss专用的视觉效果
@@ -313,12 +313,12 @@ export class Boss extends Enemy {
         
         // 优先使用特殊技能
         if (this.bossState !== BossState.CHARGE) {
-            if (this.chargeCooldown <= 0 && distanceToPlayer > 5 && distanceToPlayer < 20) {
+            if (this.chargeCooldown <= 0 && distanceToPlayer > 5 && distanceToPlayer < 40) {
                 this.startCharge();
                 return;
             }
             
-            if (this.smashCooldown <= 0 && distanceToPlayer < 6) {
+            if (this.smashCooldown <= 0 && distanceToPlayer < 9) {
                 this.startSmash();
                 return;
             }
@@ -471,21 +471,58 @@ export class Boss extends Enemy {
         this.bossState = BossState.SMASH;
         this.smashCooldown = this.smashInterval;
         
-        // 砸地预警
-        this.mesh.position.y += 3;
-        this.showDialogue("尝尝这个！");
+        // 砸地预警 - 红色圆形范围提示
+        const warningRange = 10;
+        const warningGeo = new THREE.RingGeometry(warningRange - 0.5, warningRange, 32);
+        const warningMat = new THREE.MeshBasicMaterial({
+            color: 0xff0000,
+            transparent: true,
+            opacity: 0.6,
+            side: THREE.DoubleSide
+        });
+        const warningRing = new THREE.Mesh(warningGeo, warningMat);
+        warningRing.rotation.x = -Math.PI / 2;
+        warningRing.position.copy(this.position);
+        warningRing.position.y = 0.1;
+        this.scene.add(warningRing);
         
+        // 预警1.5秒后消失
         setTimeout(() => {
-            this.performSmash();
-        }, 800);
+            this.scene.remove(warningRing);
+        }, 1500);
+        
+        // 跳跃动画 - 先跳起
+        const startY = this.position.y;
+        const jumpHeight = 8;
+        const jumpDuration = 1000; // 毫秒（配合1.5秒预警）
+        const jumpStartTime = Date.now();
+        
+        const animateJump = () => {
+            const elapsed = Date.now() - jumpStartTime;
+            const progress = Math.min(elapsed / jumpDuration, 1);
+            
+            // 跳跃曲线：先上升后下降
+            const jumpCurve = Math.sin(progress * Math.PI);
+            this.mesh.position.y = startY + jumpHeight * jumpCurve;
+            this.position.y = this.mesh.position.y;
+            
+            if (progress < 1) {
+                requestAnimationFrame(animateJump);
+            } else {
+                // 落地砸地
+                this.mesh.position.y = 1;
+                this.position.y = 1;
+                this.performSmash();
+            }
+        };
+        
+        this.showDialogue("尝尝这个！");
+        animateJump();
     }
     
     performSmash() {
-        // 砸地动作
-        this.mesh.position.y = 1;
-        
         // 范围伤害
-        const smashRange = 8;
+        const smashRange = 10;
         if (this.position.distanceTo(this.player.getPosition()) < smashRange) {
             this.player.takeDamage(this.damage * 1.5);
         }

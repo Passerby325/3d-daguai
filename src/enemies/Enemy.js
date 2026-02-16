@@ -172,7 +172,6 @@ export class Enemy {
                 } else if (this.health < this.maxHealth * 0.2) { // 血量更低才逃跑
                     if (Math.random() > 0.7) {
                         this.changeState(AIState.FLEE);
-                        this.showDialogue("我需要撤退！");
                     }
                 }
                 break;
@@ -183,7 +182,6 @@ export class Enemy {
                 } else if (this.health < this.maxHealth * 0.2) {
                     if (Math.random() > 0.7) {
                         this.changeState(AIState.FLEE);
-                        this.showDialogue("太强大了，我先撤！");
                     }
                 }
                 break;
@@ -191,7 +189,6 @@ export class Enemy {
             case AIState.FLEE:
                 if (distanceToPlayer > this.detectionRange * 2.5 || this.health > this.maxHealth * 0.5) {
                     this.changeState(AIState.IDLE);
-                    this.showDialogue("现在安全了...");
                 }
                 break;
         }
@@ -225,11 +222,7 @@ export class Enemy {
             
             // 状态切换时的AI对话
             if (newState === AIState.CHASE) {
-                const dialogues = ["发现目标！", "别想跑！", "我来解决你！"];
-                this.showDialogue(dialogues[Math.floor(Math.random() * dialogues.length)]);
             } else if (newState === AIState.ATTACK) {
-                const dialogues = ["吃我一击！", "接招！", "受死吧！"];
-                this.showDialogue(dialogues[Math.floor(Math.random() * dialogues.length)]);
             }
         }
     }
@@ -361,12 +354,6 @@ export class Enemy {
         // 显示伤害数字
         this.showDamageText(amount);
         
-        // 受伤对话
-        if (this.health > 0) {
-            const dialogues = ["好痛！", "该死！", "你会后悔的！", "有点本事！"];
-            this.showDialogue(dialogues[Math.floor(Math.random() * dialogues.length)]);
-        }
-        
         if (this.health <= 0) {
             this.die();
         }
@@ -411,8 +398,6 @@ export class Enemy {
         // 死亡动画
         this.mesh.rotation.x = Math.PI / 2;
         this.mesh.position.y = 0.5;
-        
-        this.showDialogue("啊...我输了...");
         
         // 击杀小怪回血（最大生命值的五分之一）
         const healAmount = Math.ceil(this.player.maxHealth / 5);

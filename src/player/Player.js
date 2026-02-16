@@ -1,13 +1,21 @@
 import * as THREE from 'three';
 
 export class Player {
-    constructor(camera, scene) {
+    constructor(camera, scene, enemyManager = null) {
         this.camera = camera;
         this.scene = scene;
+        this.enemyManager = enemyManager;
         
         this.health = 100;
         this.maxHealth = 100;
         this.speed = this.baseSpeed;
+        
+        // 碰撞半径
+        this.collisionRadius = 0.8;
+        
+        // 碰撞伤害相关
+        this.lastCollisionDamageTime = 0;
+        this.collisionDamageCooldown = 1; // 碰撞伤害冷却1秒
         
         // 子弹系统
         this.bullets = 0;
@@ -504,8 +512,50 @@ export class Player {
         this.position.x = Math.max(-95, Math.min(95, this.position.x));
         this.position.z = Math.max(-95, Math.min(95, this.position.z));
         
+        // 敌人碰撞检测
+        this.handleEnemyCollision();
+        
         // 更新相机位置
         this.camera.position.copy(this.position);
+    }
+    
+    handleEnemyCollision() {
+        if (!this.enemyManager) return;
+        
+        const enemies = this.enemyManager.getEnemies();
+        const bosses = this.enemyManager.bosses || [];
+        
+        const allTargets = [...enemies, ...bosses];
+        const currentTime = Date.now() / 1000;
+        
+        for (const target of allTargets) {
+            if (!target || target.isDead || !target.mesh) continue;
+            
+            const targetPos = target.getPosition();
+            const distance = this.position.distanceTo(targetPos);
+            
+            const targetRadius = target.isBoss ? 3 : 0.8;
+            const minDist = this.collisionRadius + targetRadius;
+            
+            if (distance < minDist && distance > 0) {
+                // 计算推力方向
+                const pushDir = new THREE.Vector3()
+                    .subVectors(this.position, targetPos)
+                    .normalize();
+                
+                // 将玩家推开
+                const overlap = minDist - distance;
+                this.position.x += pushDir.x * overlap;
+                this.position.z += pushDir.z * overlap;
+                
+                // 碰撞造成伤害
+                if (currentTime - this.lastCollisionDamageTime >= this.collisionDamageCooldown) {
+                    const damage = target.isBoss ? 30 : 10;
+                    this.takeDamage(damage);
+                    this.lastCollisionDamageTime = currentTime;
+                }
+            }
+        }
     }
     
     takeDamage(amount) {

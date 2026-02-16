@@ -60,13 +60,17 @@ export class Game {
         // 创建环境
         this.createEnvironment();
         
-        // 创建玩家
+        // 创建玩家（暂时不传enemyManager）
         console.log('创建玩家...');
-        this.player = new Player(this.camera, this.scene);
+        this.player = new Player(this.camera, this.scene, null);
         console.log('玩家创建成功');
         
         // 创建敌人管理器
+        console.log('创建敌人管理器...');
         this.enemyManager = new EnemyManager(this.scene, this.player);
+        
+        // 更新玩家的enemyManager引用
+        this.player.enemyManager = this.enemyManager;
         
         // 创建战斗系统
         this.combatSystem = new CombatSystem(this.player, this.enemyManager);
